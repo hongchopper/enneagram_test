@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>에니어그램 설문지</title>
+<meta name="description" content="나와 비슷한 문장에 체크하고 가까운 에니어그램 유형을 찾아봐요.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="에니어그램 설문지">
+<meta property="og:description" content="나와 비슷한 문장에 체크하고 가까운 유형을 찾아봐요.">
+<meta property="og:image" content="https://hongchopper.github.io/enneagram_test/survey-thumb.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  /* 강의용 설문지. 다른 파일 없이 이 파일 하나로 동작한다 */
+  :root {
+    --primary: #6553C2;
+    --primary-hover: #5443AE;
+    --primary-light: #9C8CE8;
+    --primary-soft: #EEEAFD;
+    --accent-soft: #F6F4FE;
+    --text: #3A3845;
+    --text-sub: #5F5B6E;
+    --text-faint: #A9A5B4;
+    --bg: #FFFFFF;
+    --backdrop: #F8F9F9;
+    --fill: #F3F3F6;
+    --border: #E8E8EC;
+    --border-strong: #C9C7D1;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--backdrop); }
+  body {
+    margin: 0 auto;
+    max-width: 616px;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { padding: 32px 16px 64px; }
+
+  .survey-head h1 { margin: 0 0 8px; font-size: 28px; font-weight: 700; line-height: 1.3; }
+  .survey-head p { margin: 0; font-size: 15px; color: var(--text-sub); }
+
+  .progress { position: sticky; top: 0; z-index: 1; margin: 16px -16px 24px; padding: 12px 16px; background: var(--bg); }
+  .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-sub); margin-bottom: 8px; }
+  .progress-track { height: 8px; border-radius: 999px; background: var(--fill); overflow: hidden; }
+  .progress-bar { height: 100%; width: 0; background: var(--primary); border-radius: 999px; transition: width 240ms ease; }
+
+  fieldset { margin: 0 0 48px; padding: 0; border: 0; min-width: 0; }
+  legend { padding: 0; margin-bottom: 8px; }
+  .q-num { display: block; font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+  .q-title { display: block; font-size: 22px; font-weight: 700; line-height: 1.4; }
+  .q-hint { margin: 0 0 16px; font-size: 15px; color: var(--text-sub); }
+
+  .group { margin-bottom: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg); }
+  .group-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .group-name { font-size: 18px; font-weight: 700; }
+  .group-count { font-size: 13px; color: var(--text-sub); }
+  .group-count.has { color: var(--primary); font-weight: 600; }
+
+  /* 문장 하나 = 체크박스 하나 */
+  .item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 8px;
+    margin: 0 -8px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .item:hover { background: var(--accent-soft); }
+  .item input {
+    flex: none;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    margin: 1px 0 0;
+    border: 2px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--bg) center / 14px no-repeat;
+    cursor: pointer;
+  }
+  .item input:checked {
+    border-color: var(--primary);
+    background-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2 5 8.5l4.5-5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  .item input:focus-visible { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+  .item:has(input:checked) { background: var(--accent-soft); }
+  .item:has(input:checked) .item-text { font-weight: 500; }
+
+  .btn {
+    display: block; width: 100%;
+    padding: 16px;
+    border: 0; border-radius: 999px;
+    font: inherit; font-size: 16px; font-weight: 600;
+    cursor: pointer; text-align: center;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-primary:disabled { background: var(--border); color: var(--text-faint); cursor: default; }
+  .btn:focus-visible { outline: 2px solid var(--primary-light); outline-offset: 2px; }
+  .submit-note { margin: 8px 0 0; text-align: center; font-size: 13px; color: var(--text-sub); }
+  .submit-note[hidden] { display: none; }
+
+  .result[hidden] { display: none; }
+  .result-top { text-align: center; padding: 16px 0 24px; }
+  .result-badge {
+    width: 72px; height: 72px; margin: 0 auto 12px;
+    display: grid; place-items: center;
+    border-radius: 999px;
+    background: var(--primary-soft); color: var(--primary);
+    font-size: 32px; font-weight: 700;
+  }
+  .result-kicker { margin: 0; font-size: 15px; color: var(--text-sub); }
+  .result-top h2 { margin: 4px 0 8px; font-size: 28px; font-weight: 700; line-height: 1.3; }
+  .result-desc { margin: 0; font-size: 16px; }
+  .btn-secondary { margin-top: 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); text-decoration: none; }
+  .btn-secondary:hover { border-color: var(--primary-light); }
+  .detail-note { margin: 8px 0 0; text-align: center; font-size: 13px; color: var(--text-sub); }
+
+  .top3 { margin: 0 0 24px; padding: 16px; border: 1px solid var(--border); border-radius: 20px; }
+  .top3 h3 { margin: 0 0 4px; font-size: 18px; font-weight: 700; }
+  .top3 > p { margin: 0 0 8px; font-size: 13px; color: var(--text-sub); }
+  .top3 ol { margin: 0; padding: 0; list-style: none; }
+  .top3 li { display: flex; gap: 12px; align-items: baseline; padding: 12px 0; border-top: 1px solid var(--border); }
+  .top3-no { flex: none; width: 40px; font-size: 13px; font-weight: 700; color: var(--text-sub); }
+  .top3 li:first-child .top3-no { color: var(--primary); }
+  .top3 b { display: block; font-size: 16px; font-weight: 600; }
+  .top3 span.top3-desc { display: block; font-size: 13px; color: var(--text-sub); }
+  .result-note { margin: 0 0 32px; padding: 16px; border-radius: 12px; background: var(--fill); font-size: 15px; color: var(--text-sub); }
+</style>
+</head>
+<body>
+<main>
+  <form id="survey" novalidate>
+    <header class="survey-head">
+      <h1>에니어그램 설문지</h1>
+      <p>평소 나의 태도와 행동을 잘 반영한다고 여겨지는 문장에 모두 체크해 주세요. 오래 고민하지 말고 먼저 떠오르는 대로 고르면 돼요.</p>
+    </header>
+
+    <div class="progress" aria-hidden="true">
+      <div class="progress-label"><span>체크한 문장</span><span id="progress-text">0개</span></div>
+      <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+    </div>
+
+    <fieldset>
+      <legend><span class="q-num">질문 1</span><span class="q-title">A, B, C에서 나와 비슷한 문장에 체크해 주세요</span></legend>
+      <p class="q-hint">여러 개 골라도 돼요.</p>
+      <div class="group" data-g="A">
+        <div class="group-head"><span class="group-name">A</span><span class="group-count"></span></div>
+        <label class="item"><input type="checkbox" name="q1" value="A1"><span class="item-text">나는 독립적인 편이고 자기 주장을 잘 한다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="A2"><span class="item-text">나는 상황에 정면으로 맞설 때 삶이 잘 풀린다고 느낀다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="A3"><span class="item-text">나는 목표를 설정하고 그 일을 추진해 나간다. 그리고 그것이 성취되기를 원한다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="A4"><span class="item-text">나는 가만히 앉아있는 것을 좋아하지 않는다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="A5"><span class="item-text">나는 큰 일을 성취하고 영향력을 행사하기를 원한다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="A6"><span class="item-text">나는 정면 대결을 원하지는 않지만 사람들이 나를 통제하는 것도 좋아하지 않는다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="A7"><span class="item-text">대개의 경우 나는 내가 원하는 것을 잘 알고 있다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="A8"><span class="item-text">나는 일도 노는 것도 열심히 한다.</span></label>
+      </div>
+      <div class="group" data-g="B">
+        <div class="group-head"><span class="group-name">B</span><span class="group-count"></span></div>
+        <label class="item"><input type="checkbox" name="q1" value="B1"><span class="item-text">나는 조용하게 혼자 있는 것을 좋아한다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="B2"><span class="item-text">나는 사회적인 활동에 주의를 쏟지 않으며 대체로 내 의견을 강하게 주장하지 않는다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="B3"><span class="item-text">나는 앞에 나서거나 다른 사람과 경쟁하는 것을 그리 좋아하지 않는다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="B4"><span class="item-text">사람들은 나를 몽상가라고 말한다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="B5"><span class="item-text">내 상상의 세계 안에서는 많은 흥미로운 일들이 벌어진다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="B6"><span class="item-text">나는 적극적이고 활동적이라기보다는 조용한 성격이다.</span></label>
+      </div>
+      <div class="group" data-g="C">
+        <div class="group-head"><span class="group-name">C</span><span class="group-count"></span></div>
+        <label class="item"><input type="checkbox" name="q1" value="C1"><span class="item-text">나는 아주 책임감이 강하고 헌신적이다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="C2"><span class="item-text">나는 내 의무를 다하지 못할 때 아주 기분이 나쁘다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="C3"><span class="item-text">나는 사람들이 필요할 때 그들을 위해 내가 그 자리에 있다는 것을 알아주었으면 한다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="C4"><span class="item-text">나는 그들을 위해 최선을 다할 것이다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="C5"><span class="item-text">이따금씩 나는 사람들이 나를 알아주든 알아주지 않든 그들을 위해 큰 희생을 한다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="C6"><span class="item-text">나는 내 자신을 제대로 돌보지 않는다.</span></label>
+        <label class="item"><input type="checkbox" name="q1" value="C7"><span class="item-text">나는 해야 할 일을 한 다음에 시간이 나면 휴식을 취하거나 내가 원하는 일을 한다.</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="q-num">질문 2</span><span class="q-title">1, 2, 3에서 나와 비슷한 문장에 체크해 주세요</span></legend>
+      <p class="q-hint">여러 개 골라도 돼요.</p>
+      <div class="group" data-g="1">
+        <div class="group-head"><span class="group-name">1</span><span class="group-count"></span></div>
+        <label class="item"><input type="checkbox" name="q2" value="11"><span class="item-text">나는 대개 긍정적인 자세로 생활하며, 모든 일이 나에게 유리한 쪽으로 풀린다고 느낀다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="12"><span class="item-text">나는 내 열정을 쏟을 수 있는 여러 가지 방법들을 찾는다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="13"><span class="item-text">나는 사람들과 함께 하는 것, 그리고 사람들이 행복해지도록 돕는 것을 좋아한다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="14"><span class="item-text">나는 나와 마찬가지로 다른 사람들도 잘 지내기를 바란다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="15"><span class="item-text">항상 기분이 좋은 건 아니다. 하지만 나는 다른 사람들에게 그렇게 보이기 원한다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="16"><span class="item-text">나는 다른 사람들에게 항상 긍정적으로 보이고자 노력하기 때문에 때로는 나 자신의 문제를 다루는 것을 미루기도 한다.</span></label>
+      </div>
+      <div class="group" data-g="2">
+        <div class="group-head"><span class="group-name">2</span><span class="group-count"></span></div>
+        <label class="item"><input type="checkbox" name="q2" value="21"><span class="item-text">나는 어떤 것에 대해 강한 감정을 갖는다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="22"><span class="item-text">대부분의 사람들은 내가 모든 것에 대해 불만을 갖고 있다고 생각한다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="23"><span class="item-text">나는 사람들 앞에서 내 감정을 억제하지만, 남들이 생각하는 것보다 더 민감하다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="24"><span class="item-text">나는 사람들과 함께 있을 때 그들이 어떤 사람인지, 무엇을 기대할 수 있는지를 알기 원한다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="25"><span class="item-text">어떤 일에 내가 화가 났을 때, 나는 사람들이 나만큼 그 일을 해결하려고 노력해주기를 원한다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="26"><span class="item-text">나는 규칙을 알고 있다. 하지만 사람들이 내게 무엇을 하라고 지시하는 것을 좋아하지 않으며 내 스스로 결정하기를 원한다.</span></label>
+      </div>
+      <div class="group" data-g="3">
+        <div class="group-head"><span class="group-name">3</span><span class="group-count"></span></div>
+        <label class="item"><input type="checkbox" name="q2" value="31"><span class="item-text">나는 스스로를 잘 통제하고 논리적이다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="32"><span class="item-text">나는 느낌을 다루는 것을 편안해하지 않는다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="33"><span class="item-text">나는 효율적이고 완벽하게 일을 처리하며 혼자 일하는 것을 좋아한다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="34"><span class="item-text">어떤 문제나 개인적인 갈등이 있을 때 나는 그 상황에 감정이 끼어들지 않도록 한다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="35"><span class="item-text">어떤 사람들은 내가 너무 차갑고 초연하다고 말하지만, 나는 감정 때문에 중요한 일을 그르치고 싶지 않다.</span></label>
+        <label class="item"><input type="checkbox" name="q2" value="36"><span class="item-text">나는 사람들이 나를 화나게 할 때 대부분의 경우 반응을 보이지 않는다.</span></label>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn-primary" id="submit" disabled>결과 보기</button>
+    <p class="submit-note" id="submit-note">질문 1과 질문 2에서 하나 이상 체크하면 결과를 볼 수 있어요.</p>
+  </form>
+
+  <section class="result" id="result" hidden aria-live="polite">
+    <div class="result-top">
+      <div class="result-badge" id="result-badge"></div>
+      <p class="result-kicker">가장 가까운 유형</p>
+      <h2 id="result-title"></h2>
+      <p class="result-desc" id="result-desc"></p>
+    </div>
+
+    <div class="top3">
+      <h3>예상 유형 순위</h3>
+      <p>2·3순위는 1순위와 헷갈릴 수 있는 유형이에요. 설명을 읽고 더 와닿는 쪽을 찾아보세요.</p>
+      <ol id="top3"></ol>
+    </div>
+
+    <p class="result-note">이 결과는 정답이 아니라 나를 살펴보는 단서예요. 행동보다 ‘왜 그렇게 했는지’가 나와 맞는지 확인해보세요.</p>
+
+    <button type="button" class="btn btn-primary" id="retry">다시 하기</button>
+    <a class="btn btn-secondary" href="survey-detail.html">상세 검사 하기</a>
+    <p class="detail-note">총 156문항이고 약 20분 걸려요.<br>내 유형을 정확하게 알아보고 싶은 분께 추천드려요.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  // A·B·C × 1·2·3 조합 → 유형 (RHETI 간이 설문 채점표)
+  var KEY = {
+    A1: 7, A2: 8, A3: 3,
+    B1: 9, B2: 4, B3: 5,
+    C1: 2, C2: 6, C3: 1
+  };
+  var TYPES = {
+    1: { name: '개혁가', desc: '더 올바르고 좋은 방향을 찾는 사람' },
+    2: { name: '조력가', desc: '사랑받고 필요한 사람이 되고 싶은 사람' },
+    3: { name: '성취자', desc: '유능함과 결과로 자신을 증명하려는 사람' },
+    4: { name: '개인주의자', desc: '나다움과 특별한 정체성을 찾는 사람' },
+    5: { name: '탐구자', desc: '충분히 알고 준비되어 있고 싶은 사람' },
+    6: { name: '충실가', desc: '안전과 확실함을 찾는 사람' },
+    7: { name: '열정가', desc: '자유롭고 즐거운 가능성을 찾는 사람' },
+    8: { name: '도전자', desc: '강하게 주도하고 통제력을 갖고 싶은 사람' },
+    9: { name: '평화주의자', desc: '편안함과 조화를 유지하고 싶은 사람' }
+  };
+  var GROUPS = { q1: ['A', 'B', 'C'], q2: ['1', '2', '3'] };
+
+  var form = document.getElementById('survey');
+  var submit = document.getElementById('submit');
+  var note = document.getElementById('submit-note');
+  var bar = document.getElementById('progress-bar');
+  var progressText = document.getElementById('progress-text');
+  var result = document.getElementById('result');
+  var totalItems = form.querySelectorAll('input[type="checkbox"]').length;
+
+  function tally(q) {
+    var out = {};
+    GROUPS[q].forEach(function (g) {
+      var box = form.querySelector('.group[data-g="' + g + '"]');
+      var total = box.querySelectorAll('input').length;
+      var on = box.querySelectorAll('input:checked').length;
+      out[g] = { g: g, on: on, total: total, ratio: on / total };
+    });
+    return out;
+  }
+
+  function update() {
+    var all = form.querySelectorAll('input:checked').length;
+    var done = 0;
+    ['q1', 'q2'].forEach(function (q) {
+      var t = tally(q);
+      var sum = 0;
+      GROUPS[q].forEach(function (g) {
+        sum += t[g].on;
+        var el = form.querySelector('.group[data-g="' + g + '"] .group-count');
+        el.textContent = t[g].on + ' / ' + t[g].total;
+        el.classList.toggle('has', t[g].on > 0);
+      });
+      if (sum > 0) done++;
+    });
+    bar.style.width = (all / totalItems * 100) + '%';
+    progressText.textContent = all + '개';
+    submit.disabled = done < 2;
+    note.hidden = done === 2;
+  }
+
+  form.addEventListener('change', update);
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var t1 = tally('q1');
+    var t2 = tally('q2');
+
+    // 아홉 조합 점수 = 두 묶음 체크 비율의 평균 (0~100)
+    var list = [];
+    GROUPS.q1.forEach(function (a) {
+      GROUPS.q2.forEach(function (b) {
+        list.push({
+          type: KEY[a + b], a: a, b: b,
+          score: Math.round((t1[a].ratio + t2[b].ratio) / 2 * 100),
+          raw: t1[a].ratio + t2[b].ratio,
+          on: t1[a].on + t2[b].on
+        });
+      });
+    });
+    list.sort(function (x, y) { return y.raw - x.raw || y.on - x.on || x.type - y.type; });
+
+    // 점수가 같으면 같은 순위
+    var rank = 0;
+    list.forEach(function (it, i) {
+      if (i === 0 || Math.abs(it.raw - list[i - 1].raw) > 1e-9) rank = i + 1;
+      it.rank = rank;
+    });
+
+    var top = list[0];
+    var ties = list.filter(function (it) { return it.rank === 1; });
+    document.getElementById('result-badge').textContent = top.type;
+    document.getElementById('result-title').textContent = ties.length > 1
+      ? ties.map(function (it) { return it.type + '번'; }).join(' · ') + '에 가까워요'
+      : top.type + '번 ' + TYPES[top.type].name + '에 가까워요';
+    document.getElementById('result-desc').textContent = ties.length > 1
+      ? '점수가 같은 유형이 있어요: ' + ties.map(function (it) { return it.type + '번 ' + TYPES[it.type].name; }).join(', ')
+      : TYPES[top.type].desc;
+
+    var ranked = list;
+    // 1~3순위 (점수가 같으면 같은 순위)
+    document.getElementById('top3').innerHTML = ranked.slice(0, 3).map(function (it) {
+      return '<li><span class="top3-no">' + it.rank + '순위</span><div><b>' + it.type + '번 ' + TYPES[it.type].name + '</b>' +
+        '<span class="top3-desc">' + TYPES[it.type].desc + '</span></div></li>';
+    }).join('');
+
+    form.hidden = true;
+    result.hidden = false;
+    window.scrollTo(0, 0);
+  });
+
+  document.getElementById('retry').addEventListener('click', function () {
+    form.reset();
+    update();
+    result.hidden = true;
+    form.hidden = false;
+    window.scrollTo(0, 0);
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
